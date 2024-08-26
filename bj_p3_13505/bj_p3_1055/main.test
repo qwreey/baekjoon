@@ -1,0 +1,32 @@
+#:INPUT
+abc
+$x$y$z$
+10
+30 50
+#:OUTPUT
+bcyabcxabcyabczabczab
+#:
+#:INPUT
+a
+$meric$
+6
+1 35
+#:OUTPUT
+americamericamericamericamericameri
+#:
+#:INPUT
+top
+$coder
+1
+1 20
+#:OUTPUT
+topcoder------------
+#:
+#:INPUT
+xy
+$a$bb
+12
+5000 5099
+#:OUTPUT
+xybbbbaxyaxybbaxyaxybbbbbbbbaxyaxybbaxyaxybbbbaxyaxybbaxyaxybbbbbbaxyaxybbaxyaxybbbbaxyaxybbaxyaxybb
+#:

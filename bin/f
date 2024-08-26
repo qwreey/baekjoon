@@ -1,0 +1,58 @@
+#!/bin/bash
+
+here="$(dirname "$(realpath $0)")"
+
+case $1 in
+    -t|--test)
+        testfile=$2
+        shift 2
+
+        1,2,3,4  1..5  filenamee
+    ;;
+    -r|--runner)
+
+    ;;
+esac
+
+filename=${file%.*}
+extension=${extension-${file##*.}}
+testfile=${testfile-$filename.test}
+conffile=$filename.conf
+
+
+wrap(){ [ "$1" != "0" ] && echo "$2" && exit $1 }
+
+if [ -e "$conffile" ]; then
+    source $conffile
+    wrap $? "Conf error"
+fi
+
+cattest(){
+    if [ -e "$testfile" ]; then
+        cat "$testfile" | "$@"
+        return $?
+    fi
+    "$@"
+    return $?
+}
+
+case $extension in
+    c)
+    ;;
+
+    cpp)
+    ;;
+
+    pl)
+        perl
+    ;;
+
+    lua)
+        tool=$(command -v lua)
+        wrap $? "Error: lua is not installed."
+
+        if [ -e $testfile ]; then
+            cattest $tool $file
+        fi
+    ;;
+esac

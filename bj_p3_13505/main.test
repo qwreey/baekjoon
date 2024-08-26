@@ -1,0 +1,51 @@
+:test{['
+
+
+
+
+test1 = {
+    SOME = !HEX 0x11
+    INPUT = [
+        !LN
+        # Comment
+        !LN 5
+        !LN 1 2 3 4 5
+        !STR str
+        !NUM 0x.. etc
+        !NUM 11 AS int32
+        !NUL
+    ]
+    OUTPUT = [
+        !LINE 7
+    ]
+    KEY2 = '
+        !LINE a
+    '
+}
+
+
+:TEST[
+    :{
+        :INPUT'
+            !LN
+        '
+        :OUTPUT'
+        '
+    }
+]
+
+asd[2]+=(o1 o2)
+("${(@)a[1,$i-1]}" "${(@)a[$i+1,$#a]}")
+
+#:INPUT
+5
+0 1 0 1 0
+#:OUTPUT
+1
+#:
+#:INPUT
+6
+1 2 4 8 16 32
+#:OUTPUT
+48
+#:

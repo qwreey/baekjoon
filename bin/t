@@ -1,0 +1,130 @@
+#!/bin/perl
+use File::Basename;
+use Data::Dumper;
+use lib $SPATH=do{use File::Basename;dirname$0};
+use Runtask;
+use Readdir;
+use Cwd qw'abs_path';
+
+# Get target file name
+my$name=$ARGV[0];
+$name="./" if!$name;
+if(-d$name){
+    Readdir::readdir \my@dir,'./';
+    $name=(grep{!/main\.test$/}grep{/main\..*?$/}@dir)[0];
+}
+$name=~/\.(.*?)$/;
+my$lang=$1;
+$name=abs_path$name;
+
+# Read testfile
+$name=~/^(.+)\..*?$/;
+open my$testfile,'<',$1.'.test';
+my@ti;my@to;my@tn;my$buffer='';my$flushto;
+while(<$testfile>){
+    if(/^#:(INPUT|OUTPUT|.*)/){
+        push@ti,$buffer if$flushto eq 'INPUT';
+        push@to,$buffer if$flushto eq 'OUTPUT';
+        $flushto=$1;
+        push@tn,$flushto if$flushto;
+        $buffer='';
+    } else {
+        $buffer.=$_;
+    }
+}
+@tn=grep{!/INPUT|OUTPUT/}@tn;
+print Dumper\@tn;
+close$testfile;
+
+# Check runner & run pre/main/post
+$runner="$SPATH/runner/$lang";
+die 'Runner not found' if!-e$runner;
+die 'Runner is not executable file' if!-x$runner;
+my$arg='';
+if(-x"$SPATH/runner/$lang-pre"){
+    $arg=`$SPATH/runner/$lang-pre $name`;
+    $?&&die;
+}
+my@tc=map{[$runner,$name,$arg]}@ti;
+Runtask::runtask \my@exits,\my@stdouts,\my@stderrs,\@tc,\@ti;
+if(-x"$SPATH/runner/$lang-post"){
+    system "$SPATH/runner/$lang-post","$name","$arg";
+    $?&&die;
+}
+
+# Check output
+for(0..$#stdouts){
+    $stdouts[$_]
+}
+print Dumper \@stdouts
+
+
+sub qget {
+    my@arr=@{$_[3]};
+
+    my@stack;
+    my@arridx;
+    my@typidx;
+
+    for(@arr){
+        next if/^ *#/;
+
+        # stack pop (close arr/obj/str)
+        if(/^ *([\]}'])/){
+            pop@stack;
+            pop@arridx if$1 eq '\'';
+            next;
+        }
+        # set val (obj)
+        if(/^( *)([^= :]+) *= *([\[{])/){
+            next
+        }
+        if(/^( *)([^= :]+) *= *!([A-Z]+) *(.*)/){
+            
+        }
+        # set element (arr)
+        if(/^( *)/)
+    }
+
+
+    for(@arr){
+        #SPACE CMD     
+        /( *)([}\]'#:])(.*?)([{\[']?) *$/;
+        next if$2 eq '#';
+        if($2 eq ':'){
+            push@typidx,$4;
+            push@stack,$3;
+            push@arridx,0 if$4 eq '[';
+        }
+        if($2 eq '')
+    }
+}
+
+sub qptr {}
+
+sub qset {
+    @arr=@{$_[3]};
+}
+
+sub qins {}
+
+sub qrm {}
+
+# :test1{
+#     :INPUT[
+#         #Comment
+#         !LN 5
+#         !LN 1 2 3 4 5
+#         !STR str
+#         !NUM 0x.. etc
+#         !NUM 11 AS int32
+#         !NUL
+#     ]
+#     :OUTPUT[
+#         !LINE 7
+#     ]
+#     :KEY2'
+#         !LINE a
+#     '
+# }
+

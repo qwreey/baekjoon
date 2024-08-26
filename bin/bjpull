@@ -1,0 +1,49 @@
+#!/bin/perl
+
+$SPATH=do{use File::Basename;dirname$0};
+$ARGV[0]=~/(\d+)$/;
+die'No ID'if!$1;
+$id=$1;
+
+# Get level prefix
+@levels=qw/un b5 b4 b3 b2 b1 s5 s4 s3 s2 s1 g5 g4 g3 g2 g1 p5 p4 p3 p2 p1 r5 r4 r3 r2 r1/;
+`curl -s https://solved.ac/api/v3/problem/show?problemId=$id` =~ /"level":(\d+)/;
+$level=$1;
+
+# Folder items
+$lang=$ARGV[1];
+$lang="cpp"if!$lang;
+$folder="bj_$levels[$level]_$id";
+$main="$folder/main.$lang";
+
+# Make folder
+if(-d$folder){
+        print$main;
+        exit 0;
+};
+mkdir $folder or die$!;
+
+# Read bj page
+$url='https://www.acmicpc.net/problem/'.$id;
+$page=`curl -sH "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36" $url`;
+@inputs = $page =~/<pre class="sampledata" id="sample\-input\-\d+">(.*?)<\/pre>/gs;
+@outputs = $page =~/<pre class="sampledata" id="sample\-output\-\d+">(.*?)<\/pre>/gs;
+
+# Create test file
+$test='';
+$test.="#:INPUT\n$inputs[$_]#:OUTPUT\n$outputs[$_]#:\n" for(0..$#inputs);
+open$testfile,'>',"$folder/main.test" or die $!;
+print{$testfile} $test;
+close$testfile;
+
+# Copy template
+$template="$SPATH/template/.$lang";
+open$mainfile,'>',$main;
+if(-e$template){
+    open$templatefile,"<",$template or die$!;
+    print{$mainfile}do{local$/;<$templatefile>};
+    close$templatefile;
+}
+close$mainfile;
+
+print$main;

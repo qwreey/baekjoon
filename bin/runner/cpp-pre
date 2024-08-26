@@ -1,0 +1,7 @@
+#!/bin/bash
+
+bin="${1%.*}.bin"
+g++ "$1" -o "$bin"
+ERR=$?
+[ "$ERR" != "0" ] && >&2 echo "Compile failed" && exit $ERR
+printf "%s" "$bin"
